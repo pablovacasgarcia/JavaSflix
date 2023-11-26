@@ -1,18 +1,28 @@
 window.onload = () => {
     peliculasDiv = document.getElementById("peliculas");
+    informesDiv = document.getElementById("informes");
     input = document.getElementById("buscar");
     fondoGris = document.getElementById("fondoGris");
     detalles = document.getElementById("detalles");
     seriesBtn = document.getElementById("seriesBtn");
     pelisBtn = document.getElementById("pelisBtn");
     closeSearch = document.getElementById("closeSearch");
+    crearInforme = document.getElementById("informe");
+    calificacionDiv = document.getElementById("calificacion");
+    recaudacionDiv = document.getElementById("recaudacion");
+    votosDiv = document.getElementById("votos");
+    loader = document.getElementById("loader");
     body = document.querySelector("body");
+    header = document.querySelector("header");
 
-    apiKey = "de819033";
+    // Cargar la biblioteca de Google Charts
+    google.charts.load('current', {'packages':['corechart']});    
+
+    apiKey = "b972f468";
     series = false;
     
     // Agregar un listener al evento scroll
-    window.addEventListener('scroll', scrollInfinito);
+    window.addEventListener('scroll', ()=>{if(peliculasDiv.style.display!="none"){scrollInfinito()}});
 
     input.addEventListener("input", buscar); 
 
@@ -31,7 +41,17 @@ window.onload = () => {
         seriesBtn.style.textDecoration="none";
     });
 
-    closeSearch.addEventListener("click", ()=>{input.value=""; peliculasDiv.innerHTML=""})
+    closeSearch.addEventListener("click", ()=>{
+        input.value="";
+        peliculasDiv.innerHTML="";
+        body.style.backgroundImage="url(img/fondo.jpg)";
+        header.style.height="180px";
+        crearInforme.style.top="-10%";
+        loader.style.display="none";
+        document.getElementById("informes").style.display="none";
+    })
+
+    crearInforme.addEventListener("click", mostrarInforme);
 };
 
 pagNum = 1;
@@ -56,9 +76,17 @@ function cargarPelis(title) {
                 if (data.totalResults>0){
                     peliculas = data.Search;
                     mostrarPeliculas(peliculas);
+                    crearInforme.style.top="3%";
                 } else {
                     maxPags = 2;
+                    crearInforme.style.top="-10%";
+                    noResultados=document.createElement("h5");
+                    noResultados.innerHTML="No se han encontrado resultados";
+                    peliculasDiv.appendChild(noResultados);
                 }
+                loader.style.display="none";
+            } else if (this.readyState < 4){
+                loader.style.display="initial";
             }
         };
         xhttp.open("GET", "https://www.omdbapi.com/?apikey=" + apiKey + "&s=" + title + "&page=" + pagNum + "&type=" + type, true);
@@ -67,20 +95,40 @@ function cargarPelis(title) {
 }
 
 function mostrarPeliculas(peliculas) {
+    body.style.overflow = "initial";
     peliculas.forEach((pelicula) => {
-        peliculaDiv = document.createElement("div");
-        peliculaDiv.id=pelicula.imdbID;
-        peliculaDiv.className = "pelicula";
-        peliculaDiv.style.backgroundImage = "url(" + pelicula.Poster + ")";
-        title = document.createElement("h2");
-        title.innerHTML = pelicula.Title;
-        peliculaDiv.appendChild(title);
-
-        peliculasDiv.appendChild(peliculaDiv);
-
-        peliculaDiv.addEventListener("click", mostarDetalles)
+        mostrarPelicula(pelicula, peliculasDiv)
     });
+    
     cargando = false;
+    loader.style.display="none";
+}
+
+function mostrarPelicula(pelicula, div){
+    peliculaDiv = document.createElement("div");
+    peliculaDiv.id=pelicula.imdbID;
+    peliculaDiv.className = "pelicula";
+    if (pelicula.Poster!="N/A"){
+        peliculaDiv.style.backgroundImage = "url(" + pelicula.Poster + ")";
+    } else {
+        peliculaDiv.style.backgroundImage = "url(img/noEncontrado.jpg)";
+    }
+    title = document.createElement("h2");
+    if (div==peliculasDiv){
+        title.innerHTML = pelicula.Title;
+    } else if (div==calificacionDiv){
+        title.innerHTML = pelicula.imdbRating;
+    } else if (div==recaudacionDiv){
+        title.innerHTML = pelicula.BoxOffice;
+    } else if (div==votosDiv){
+        title.innerHTML = pelicula.imdbVotes;
+    }
+    
+    peliculaDiv.appendChild(title);
+
+    div.appendChild(peliculaDiv);
+
+    peliculaDiv.addEventListener("click", mostarDetalles)
 }
 
 function scrollInfinito(){
@@ -96,12 +144,22 @@ function scrollInfinito(){
 }
 
 function buscar(){
+    peliculasDiv.style.display="flex";
     peliculasDiv.innerHTML="";
+    informesDiv.style.display="none";
     pagNum=1;
 
     if (input.value.length >= 3){
         busqueda = input.value.replace(" ", "+");
         cargarPelis(busqueda);
+        body.style.backgroundImage="none";
+        body.style.backgroundColor="black";
+        header.style.height="100px";
+    } else if (input.value.length == 0){
+        body.style.backgroundImage="url(img/fondo.jpg)";
+        header.style.height="180px";
+        crearInforme.style.top="-10%";
+        loader.style.display="none";
     }
 }
 
@@ -110,10 +168,12 @@ function mostarDetalles(e){
     var xhttp = new XMLHttpRequest();
     xhttp.onreadystatechange = function () {
         if (this.readyState == 4 && this.status == 200) {
-
             data = JSON.parse(this.responseText);
             escribirDetalles(data);
-        }
+            loader.style.display="none";
+        } else if (this.readyState == 2){
+            loader.style.display="initial";
+        } 
     };
     xhttp.open("GET", "https://www.omdbapi.com/?apikey=" + apiKey + "&i=" + e.target.id, true);
     xhttp.send();
@@ -130,30 +190,210 @@ function escribirDetalles(data){
     titulo=document.createElement("h3");
     genero=document.createElement("p");
     director=document.createElement("p");
+    actores=document.createElement("p");
     duracion=document.createElement("p");
     fecha=document.createElement("p");
     calificacion=document.createElement("p");
     plot=document.createElement("p");
+    imagen=document.createElement("img");
 
     titulo.innerHTML=data.Title;
-    genero.innerHTML=data.Genre;
-    director.innerHTML=data.Director;
-    duracion.innerHTML=data.Runtime;
-    fecha.innerHTML=data.Released;
-    calificacion.innerHTML=data.imdbRating;
-    plot.innerHTML=data.Plot;
-
     detalles.appendChild(titulo)
-    detalles.appendChild(genero)
-    detalles.appendChild(director)
-    detalles.appendChild(duracion)
-    detalles.appendChild(fecha)
-    detalles.appendChild(calificacion)
-    detalles.appendChild(plot)
+
+    if (data.Genre!="N/A"){
+        genero.innerHTML="Género: "+data.Genre;
+        detalles.appendChild(genero)
+    }
+    
+    if (data.Type=="series"){
+        if (data.Writer!="N/A"){
+            director.innerHTML="Escritor: "+data.Writer;
+        }
+    } else {
+        if (data.Director!="N/A"){
+            director.innerHTML="Director: "+data.Director;
+        }
+        detalles.appendChild(director)
+    }
+    if (data.Actors!="N/A"){
+        actores.innerHTML="Actores: "+data.Actors;
+        detalles.appendChild(actores)
+    }
+    if (data.Runtime!="N/A"){
+        duracion.innerHTML="Duración: "+data.Runtime;
+        detalles.appendChild(duracion)
+    }
+    if (data.Released!="N/A"){
+        fecha.innerHTML="Estreno: "+data.Released;
+        detalles.appendChild(fecha)
+    }
+    data.Ratings.forEach(rating => {
+        calificacion.innerHTML+=rating.Source+": "+rating.Value+"<br>";
+        detalles.appendChild(calificacion)
+    });
+    if (data.Plot!="N/A"){
+        plot.innerHTML=data.Plot;
+        detalles.appendChild(plot)
+    }
+    if (data.Poster!="N/A"){
+        imagen.src=data.Poster;
+        detalles.appendChild(imagen)
+    }
+    
 }
 
 function ocultarDetalles(){
     fondoGris.style.display="none";
     detalles.style.display="none";
     body.style.overflow= "initial";
+}
+
+function mostrarInforme() {
+    peliculasDiv.style.display = "none";
+    crearInforme.style.top = "-10%";
+    informesDiv.style.display = "flex";
+    calificacionDiv.innerHTML="";
+    recaudacionDiv.innerHTML="";
+    votosDiv.innerHTML="";
+    
+
+    peliculas = new Array;
+    peliculas = document.querySelectorAll(".pelicula");
+    loader.style.display="initial";
+
+    // Función para hacer una solicitud y devolver una promesa
+    function hacerSolicitud(url) {
+        return new Promise(function (resolve, reject) {
+            var xhttp = new XMLHttpRequest();
+            xhttp.onreadystatechange = function () {
+                if (this.readyState == 4) {
+                    if (this.status == 200) {
+                        resolve(JSON.parse(this.responseText));
+                    } else {
+                        reject(new Error("Error en la solicitud"));
+                    }
+                }
+            };
+            xhttp.open("GET", url, true);
+            xhttp.send();
+        });
+    }
+
+    // Array de promesas para todas las solicitudes
+    var promesas = new Array;
+
+    peliculas.forEach(pelicula => {
+        var url = "https://www.omdbapi.com/?apikey=" + apiKey + "&i=" + pelicula.id;
+        promesas.push(hacerSolicitud(url));
+    });
+
+    // Esperar a que todas las promesas se resuelvan
+    Promise.all(promesas)
+        .then(function (resultados) {
+            loader.style.display="none";
+            // Llamar a la función de dibujo después de cargar la biblioteca
+            dibujarGraficos(resultados);
+
+            informesCalificacion = resultados.sort(function (a, b) {
+                return parseFloat(b.imdbRating) - parseFloat(a.imdbRating);
+            });
+
+            informesCalificacion = resultados.filter(pelicula => pelicula.imdbRating !== "N/A");
+
+            for (let i=0; i<5; i++) {
+                mostrarPelicula(informesCalificacion[i], calificacionDiv)
+            }
+
+            if (resultados[0].Type!="series"){
+                document.getElementById("BoxOffice-chart").style.display="initial";
+                informesRecaudacion = resultados.sort(function (a, b) {
+                    return parseFloat(b.BoxOffice.replace(/$/, "").replace(/,/g, ".")) - parseFloat(a.BoxOffice.replace(/$/, "").replace(/,/g, "."));
+                });
+    
+                informesRecaudacion = resultados.filter(pelicula => pelicula.BoxOffice !== "N/A");
+                for (let i=0; i<5; i++) {
+                    mostrarPelicula(informesRecaudacion[i], recaudacionDiv)
+                }
+    
+            } else {
+                document.getElementById("BoxOffice-chart").style.display="none";
+            }
+
+            informesVotos = resultados.filter(pelicula => pelicula.imdbVotes !== "N/A");
+
+            informesVotos = resultados.sort(function (a, b) {
+                return parseFloat(b.imdbVotes.replace(/,/g, ".")) - parseFloat(a.imdbVotes.replace(/,/g, "."));
+            })
+
+
+            for (let i=0; i<5; i++) {
+                mostrarPelicula(informesVotos[i], votosDiv)
+            }
+
+            
+        })
+        .catch(function (error) {
+            console.error("Error al realizar las solicitudes:", error);
+        });
+
+}
+
+
+function dibujarGraficos(resultados) {
+    // Obtener datos relevantes para los gráficos
+    var informesCalificacion = obtenerDatosValidos(resultados, 'imdbRating');
+    var informesRecaudacion = obtenerDatosValidos(resultados, 'BoxOffice');
+    var informesVotos = obtenerDatosValidos(resultados, 'imdbVotes');
+
+    // Dibujar gráficos
+    dibujarGraficoBarras('Calificación', 'Rating', 'imdbRating', informesCalificacion);
+    if (resultados[0].Type!="series"){
+        dibujarGraficoBarras('Recaudación', 'Dólares', 'BoxOffice', informesRecaudacion);
+    }
+    dibujarGraficoBarras('Votos', 'Número de Votos', 'imdbVotes', informesVotos);
+}
+
+// Función para dibujar un gráfico de barras
+function dibujarGraficoBarras(titulo, ejeX, atributo, datos) {
+    var data = new google.visualization.DataTable();
+    data.addColumn('string', 'Título');
+    data.addColumn('number', ejeX);
+
+    // Agregar datos al DataTable
+    datos.forEach(pelicula => {
+        if (atributo=="imdbRating"){
+            data.addRow([pelicula.Title, parseFloat(pelicula[atributo])]);
+        } else if (atributo=="BoxOffice"){
+            data.addRow([pelicula.Title, parseInt(pelicula[atributo].replace(/,/g, "").replace("$", ""))]);
+        } else if (atributo=="imdbVotes"){
+            data.addRow([pelicula.Title, parseInt(pelicula[atributo].replace(/,/g, ""))]);
+        }
+    });
+
+    var options = {
+        title: titulo,
+        legend: 'none', // Puedes cambiar esto según tus preferencias
+        hAxis: {
+            title: 'Películas'
+        },
+        vAxis: {
+            title: ejeX
+        },
+        backgroundColor: 'black', // Cambiar el color del fondo
+        colors: ['white'], // Cambiar el color de las barras
+        textStyle: {
+            color: 'white' // Cambiar el color del texto
+        },
+        width: 800
+    };
+
+    document.getElementById(atributo+"-chart").innerHTML="";
+    var chart = new google.visualization.ColumnChart(document.getElementById(atributo+"-chart"));
+
+    chart.draw(data, options);
+}
+
+// Función para filtrar películas con datos válidos en un atributo específico
+function obtenerDatosValidos(peliculas, atributo) {
+    return peliculas.filter(pelicula => pelicula[atributo] !== 'N/A');
 }

@@ -1,6 +1,13 @@
 body{
     overflow: auto;
     background-color: black;
+    background: url(img/fondo.jpg);
+    background-size:cover;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-position-y: top;
+    transition: all 1s ease;
+    font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
 }
 
 .pelicula{
@@ -32,11 +39,13 @@ body{
 h2 {
     opacity: 0%;
     background-color: black;
-    font-size: 10px;
     margin-top: 300px;
     height: 0px;
     transition: all 1s ease;
     border-radius: 0px 0px 10px 10px;
+    text-align: center;
+    padding: 5px;
+    font-size: 100%;
 }
 
 .pelicula:hover h2{
@@ -57,20 +66,37 @@ h2 {
     display: none;
 }
 
+h5{
+    color: white;
+}
+
 #detalles{
     width: 50vw;
-    height: 80vh;
+    height: max-content;
     background-color: black;
     position: fixed;
     left: 25%;
-    top: 10%;
+    top: 20%;
     display: none;
     color: white;
     transition: all 1s ease-in-out;
     z-index: 1000;
     box-shadow: 0px 0px 5px 0px white;
     border-radius: 10px;
-    padding: 20px;
+    padding: 40px;
+}
+
+#detalles img{
+    width: 10vw;
+    position: absolute;
+    top: 12%;
+    left: 70%;
+    border-radius: 5px;
+    border: 1px solid white;
+}
+
+#detalles p{
+    width: 30vw;
 }
 
 .type{
@@ -89,11 +115,13 @@ header {
     display: flex;
     justify-content: space-around;
     width: 100%;
-    height: 100px;
+    height: 180px;
     background-color: black;
     align-items: center;
     margin: -8px;
     box-shadow: 0px 0px 5px 0px white;
+    transition: all 1s ease;
+    z-index: 100;
 }
 
 header input{
@@ -133,3 +161,133 @@ header input::content{
     transform: rotate(180deg);
     cursor: pointer;
 }
+
+#informe{
+    position: fixed;
+    width: 50px;
+    top: -20%;
+    left: 95%;
+    transition: all 0.5s ease;
+    z-index: 200;
+}
+
+#informe:hover{
+    width: 60px;
+    cursor: pointer;
+}
+
+#informes{
+    display: none;
+    color: white;
+    flex-direction: column;
+    padding-top: 100px;
+    margin-left: 50px;
+}
+
+.informes{
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+}
+
+.informes .pelicula {
+    width: 10vw;
+    height: 15vw;
+}
+
+.informes .pelicula h2{
+    margin-top: 110%;
+}
+
+.wrapper {
+    width: 200px;
+    height: 60px;
+    position: fixed;
+    z-index: 100000;
+    left: 45%;
+    top: 45%;
+    display: none;
+  }
+  
+  .circle {
+    width: 20px;
+    height: 20px;
+    position: absolute;
+    border-radius: 50%;
+    background-color: #fff;
+    left: 15%;
+    transform-origin: 50%;
+    animation: circle7124 .5s alternate infinite ease;
+  }
+  
+  @keyframes circle7124 {
+    0% {
+      top: 60px;
+      height: 5px;
+      border-radius: 50px 50px 25px 25px;
+      transform: scaleX(1.7);
+    }
+  
+    40% {
+      height: 20px;
+      border-radius: 50%;
+      transform: scaleX(1);
+    }
+  
+    100% {
+      top: 0%;
+    }
+  }
+  
+  .circle:nth-child(2) {
+    left: 45%;
+    animation-delay: .2s;
+  }
+  
+  .circle:nth-child(3) {
+    left: auto;
+    right: 15%;
+    animation-delay: .3s;
+  }
+  
+  .shadow {
+    width: 20px;
+    height: 4px;
+    border-radius: 50%;
+    background-color: rgba(0,0,0,0.9);
+    position: absolute;
+    top: 62px;
+    transform-origin: 50%;
+    z-index: -1;
+    left: 15%;
+    filter: blur(1px);
+    animation: shadow046 .5s alternate infinite ease;
+  }
+  
+  @keyframes shadow046 {
+    0% {
+      transform: scaleX(1.5);
+    }
+  
+    40% {
+      transform: scaleX(1);
+      opacity: .7;
+    }
+  
+    100% {
+      transform: scaleX(.2);
+      opacity: .4;
+    }
+  }
+  
+  .shadow:nth-child(4) {
+    left: 45%;
+    animation-delay: .2s
+  }
+  
+  .shadow:nth-child(5) {
+    left: auto;
+    right: 15%;
+    animation-delay: .3s;
+  }
+  
