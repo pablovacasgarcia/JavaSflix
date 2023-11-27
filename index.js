@@ -8,6 +8,7 @@ window.onload = () => {
     pelisBtn = document.getElementById("pelisBtn");
     closeSearch = document.getElementById("closeSearch");
     crearInforme = document.getElementById("informe");
+    cerrarInforme = document.getElementById("cerrarinforme");
     calificacionDiv = document.getElementById("calificacion");
     recaudacionDiv = document.getElementById("recaudacion");
     votosDiv = document.getElementById("votos");
@@ -33,12 +34,14 @@ window.onload = () => {
         buscar()
         seriesBtn.style.textDecoration="underline";
         pelisBtn.style.textDecoration="none";
+        cerrarInforme.style.top="-10%";
     });
     pelisBtn.addEventListener("click", () => {
         series=false;
         buscar()
         pelisBtn.style.textDecoration="underline";
         seriesBtn.style.textDecoration="none";
+        cerrarInforme.style.top="-10%";
     });
 
     closeSearch.addEventListener("click", ()=>{
@@ -47,11 +50,13 @@ window.onload = () => {
         body.style.backgroundImage="url(img/fondo.jpg)";
         header.style.height="180px";
         crearInforme.style.top="-10%";
+        cerrarInforme.style.top="-10%";
         loader.style.display="none";
         document.getElementById("informes").style.display="none";
     })
 
     crearInforme.addEventListener("click", mostrarInforme);
+    cerrarInforme.addEventListener("click", cerrarInformes);
 };
 
 pagNum = 1;
@@ -147,6 +152,7 @@ function buscar(){
     peliculasDiv.style.display="flex";
     peliculasDiv.innerHTML="";
     informesDiv.style.display="none";
+    cerrarInforme.style.top="-10%";
     pagNum=1;
 
     if (input.value.length >= 3){
@@ -255,6 +261,7 @@ function mostrarInforme() {
     calificacionDiv.innerHTML="";
     recaudacionDiv.innerHTML="";
     votosDiv.innerHTML="";
+    cerrarInforme.style.top="3%";
     
 
     peliculas = new Array;
@@ -294,11 +301,11 @@ function mostrarInforme() {
             // Llamar a la función de dibujo después de cargar la biblioteca
             dibujarGraficos(resultados);
 
-            informesCalificacion = resultados.sort(function (a, b) {
+            informesCalificacion = [...resultados].filter(pelicula => pelicula.imdbRating !== "N/A");
+
+            informesCalificacion = informesCalificacion.sort(function (a, b) {
                 return parseFloat(b.imdbRating) - parseFloat(a.imdbRating);
             });
-
-            informesCalificacion = resultados.filter(pelicula => pelicula.imdbRating !== "N/A");
 
             for (let i=0; i<5; i++) {
                 mostrarPelicula(informesCalificacion[i], calificacionDiv)
@@ -306,11 +313,11 @@ function mostrarInforme() {
 
             if (resultados[0].Type!="series"){
                 document.getElementById("BoxOffice-chart").style.display="initial";
-                informesRecaudacion = resultados.sort(function (a, b) {
-                    return parseFloat(b.BoxOffice.replace(/$/, "").replace(/,/g, ".")) - parseFloat(a.BoxOffice.replace(/$/, "").replace(/,/g, "."));
-                });
-    
-                informesRecaudacion = resultados.filter(pelicula => pelicula.BoxOffice !== "N/A");
+                informesRecaudacion = [...resultados].filter(pelicula => pelicula.BoxOffice !== "N/A");
+                informesRecaudacion=informesRecaudacion.sort(function (a, b) {
+                    return parseInt(b.BoxOffice.replace(/[^d.-e]/g, "")) - parseInt(a.BoxOffice.replace(/[^d.-e]/g, ""));
+                });    
+                
                 for (let i=0; i<5; i++) {
                     mostrarPelicula(informesRecaudacion[i], recaudacionDiv)
                 }
@@ -319,10 +326,10 @@ function mostrarInforme() {
                 document.getElementById("BoxOffice-chart").style.display="none";
             }
 
-            informesVotos = resultados.filter(pelicula => pelicula.imdbVotes !== "N/A");
+            informesVotos = [...resultados].filter(pelicula => pelicula.imdbVotes !== "N/A");
 
-            informesVotos = resultados.sort(function (a, b) {
-                return parseFloat(b.imdbVotes.replace(/,/g, ".")) - parseFloat(a.imdbVotes.replace(/,/g, "."));
+            informesVotos = informesVotos.sort(function (a, b) {
+                return parseInt(b.imdbVotes.replace(/[^d.-e]/g, "")) - parseInt(a.imdbVotes.replace(/[^d.-e]/g, ""));
             })
 
 
@@ -396,4 +403,11 @@ function dibujarGraficoBarras(titulo, ejeX, atributo, datos) {
 // Función para filtrar películas con datos válidos en un atributo específico
 function obtenerDatosValidos(peliculas, atributo) {
     return peliculas.filter(pelicula => pelicula[atributo] !== 'N/A');
+}
+
+function cerrarInformes(){
+    cerrarInforme.style.top="-10%";
+    crearInforme.style.top="3%";
+    peliculasDiv.style.display="flex";
+    informesDiv.style.display="none";
 }

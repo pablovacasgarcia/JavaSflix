@@ -162,7 +162,7 @@ header input::content{
     cursor: pointer;
 }
 
-#informe{
+#informe, #cerrarinforme{
     position: fixed;
     width: 50px;
     top: -20%;
@@ -171,7 +171,7 @@ header input::content{
     z-index: 200;
 }
 
-#informe:hover{
+#informe:hover, #cerrarinforme:hover{
     width: 60px;
     cursor: pointer;
 }
