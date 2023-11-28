@@ -19,7 +19,7 @@ window.onload = () => {
     // Cargar la biblioteca de Google Charts
     google.charts.load('current', {'packages':['corechart']});    
 
-    apiKey = "b972f468";
+    apiKey = "de819033";
     series = false;
     
     // Agregar un listener al evento scroll
@@ -114,7 +114,11 @@ function mostrarPelicula(pelicula, div){
     peliculaDiv.id=pelicula.imdbID;
     peliculaDiv.className = "pelicula";
     if (pelicula.Poster!="N/A"){
+        imagen=document.createElement("img");
+        imagen.src=pelicula.Poster;
         peliculaDiv.style.backgroundImage = "url(" + pelicula.Poster + ")";
+        peliculaDiv.appendChild(imagen);
+        imagen.addEventListener("error", (e)=>{e.target.parentNode.style.backgroundImage="url(img/noEncontrado.jpg)"})
     } else {
         peliculaDiv.style.backgroundImage = "url(img/noEncontrado.jpg)";
     }
@@ -307,9 +311,16 @@ function mostrarInforme() {
                 return parseFloat(b.imdbRating) - parseFloat(a.imdbRating);
             });
 
-            for (let i=0; i<5; i++) {
-                mostrarPelicula(informesCalificacion[i], calificacionDiv)
+            if (informesCalificacion.length>4){
+                for (let i=0; i<5; i++) {
+                    mostrarPelicula(informesCalificacion[i], calificacionDiv)
+                }
+            } else {
+                for (let i=0; i<informesCalificacion.length; i++) {
+                    mostrarPelicula(informesCalificacion[i], calificacionDiv)
+                }
             }
+            
 
             if (resultados[0].Type!="series"){
                 document.getElementById("BoxOffice-chart").style.display="initial";
@@ -318,9 +329,16 @@ function mostrarInforme() {
                     return parseInt(b.BoxOffice.replace(/[^d.-e]/g, "")) - parseInt(a.BoxOffice.replace(/[^d.-e]/g, ""));
                 });    
                 
-                for (let i=0; i<5; i++) {
-                    mostrarPelicula(informesRecaudacion[i], recaudacionDiv)
+                if (informesRecaudacion.length>4){
+                    for (let i=0; i<5; i++) {
+                        mostrarPelicula(informesRecaudacion[i], recaudacionDiv)
+                    }
+                } else {
+                    for (let i=0; i<informesRecaudacion.length; i++) {
+                        mostrarPelicula(informesRecaudacion[i], recaudacionDiv)
+                    }
                 }
+                
     
             } else {
                 document.getElementById("BoxOffice-chart").style.display="none";
@@ -332,10 +350,16 @@ function mostrarInforme() {
                 return parseInt(b.imdbVotes.replace(/[^d.-e]/g, "")) - parseInt(a.imdbVotes.replace(/[^d.-e]/g, ""));
             })
 
-
-            for (let i=0; i<5; i++) {
-                mostrarPelicula(informesVotos[i], votosDiv)
+            if (informesVotos.length>4){
+                for (let i=0; i<5; i++) {
+                    mostrarPelicula(informesVotos[i], votosDiv)
+                }
+            } else {
+                for (let i=0; i<informesVotos.length; i++) {
+                    mostrarPelicula(informesVotos[i], votosDiv)
+                }
             }
+            
 
             
         })
@@ -354,7 +378,7 @@ function dibujarGraficos(resultados) {
 
     // Dibujar gráficos
     dibujarGraficoBarras('Calificación', 'Rating', 'imdbRating', informesCalificacion);
-    if (resultados[0].Type!="series"){
+    if (resultados[0].Type!="series" && informesRecaudacion.length>0){
         dibujarGraficoBarras('Recaudación', 'Dólares', 'BoxOffice', informesRecaudacion);
     }
     dibujarGraficoBarras('Votos', 'Número de Votos', 'imdbVotes', informesVotos);

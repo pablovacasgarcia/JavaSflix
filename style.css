@@ -290,4 +290,9 @@ header input::content{
     right: 15%;
     animation-delay: .3s;
   }
+
+  .pelicula img {
+    opacity: 0;
+    display: none;
+  }
   
