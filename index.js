@@ -152,6 +152,8 @@ function scrollInfinito(){
     }
 }
 
+var miTimeout = null;
+
 function buscar(){
     peliculasDiv.style.display="flex";
     peliculasDiv.innerHTML="";
@@ -159,9 +161,16 @@ function buscar(){
     cerrarInforme.style.top="-10%";
     pagNum=1;
 
+    if(miTimeout){
+        clearTimeout(miTimeout);
+    }
     if (input.value.length >= 3){
-        busqueda = input.value.replace(" ", "+");
-        cargarPelis(busqueda);
+        miTimeout=setTimeout(()=>{
+            busqueda = input.value.replace(" ", "+");
+            cargarPelis(busqueda);
+            miTimeout=null;
+        }, 500)
+        
         body.style.backgroundImage="none";
         body.style.backgroundColor="black";
         header.style.height="100px";
